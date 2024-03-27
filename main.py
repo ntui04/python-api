@@ -75,7 +75,7 @@ async def delete_task(task_id: int):
     connection.close()
     return {"message": "Task deleted successfully"}
 
-@app.get("/create_task", response_class=HTMLResponse)
+@app.get("/create_task", response_class=HTMLResponse)  # This endpoint serves the HTML form
 async def create_task_form():
     form_html = """
     <!DOCTYPE html>
@@ -86,18 +86,50 @@ async def create_task_form():
         <title>Create Task</title>
     </head>
     <body>
+       <center>
         <h1>Create Task</h1>
-        <form action="/tasks/" method="post">
-            <label for="title">Title:</label><br>
-            <input type="text" id="title" name="title" required><br>
-            <label for="description">Description:</label><br>
-            <textarea id="description" name="description"></textarea><br>
-            <button type="submit">Submit</button>
-        </form>
+        <form id="createTaskForm">
+        <label for="title">Title:</label><br>
+        <input type="text" id="title" name="title" required><br>
+        <label for="description">Description:</label><br>
+        <textarea id="description" name="description"></textarea><br>
+        <button type="submit">Submit</button>
+    </form>
+    
+    <script>
+        document.getElementById("createTaskForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            let formData = {
+                title: document.getElementById("title").value,
+                description: document.getElementById("description").value
+            };
+
+            fetch('/tasks/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                // Optionally, do something with the response
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+
+             window.onload = fetchTasks;
+        });
+    </script>
+       </center>
     </body>
     </html>
     """
     return HTMLResponse(content=form_html)
+
+# Your other FastAPI routes...
 
 if __name__ == "__main__":
     import uvicorn
